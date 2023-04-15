@@ -6,10 +6,25 @@ name = "duckdb"
 version = "0.7.1"
 summary = "DuckDB embedded database"
 
+[[package]]
+name = "polars"
+version = "0.17.2"
+requires_python = ">=3.7"
+summary = "Blazingly fast DataFrame library"
+dependencies = [
+    "typing-extensions>=4.0.1; python_version < \"3.11\"",
+]
+
+[[package]]
+name = "typing-extensions"
+version = "4.5.0"
+requires_python = ">=3.7"
+summary = "Backported and Experimental Type Hints for Python 3.7+"
+
 [metadata]
 lock_version = "4.2"
 groups = ["default"]
-content_hash = "sha256:cf76923a1fe09142065afed98ef95887ea0ae162a75f3ce1fe0a7c7282e7425e"
+content_hash = "sha256:d01a415fb4687868c0dc3829ce8490c2a764ffbad13c5ae5f2650be461692223"
 
 [metadata.files]
 "duckdb 0.7.1" = [
@@ -60,4 +75,16 @@ content_hash = "sha256:cf76923a1fe09142065afed98ef95887ea0ae162a75f3ce1fe0a7c728
     {url = "https://files.pythonhosted.org/packages/e9/68/6a34414619ac36b8f8e88bf6ea83b54f2966e4d948d199ec9b733c4716f6/duckdb-0.7.1-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:aaf33aeb543c7816bd915cd10141866d54f92f698e1b5712de9d8b7076da19df"},
     {url = "https://files.pythonhosted.org/packages/f0/50/b18438bd9b50613c77085b49d63c2220d40959dac157c87e1af396209c55/duckdb-0.7.1-cp311-cp311-macosx_10_9_universal2.whl", hash = "sha256:54606dfd24d7181d3098030ca6858f6be52f3ccbf42fff05f7587f2d9cdf4343"},
     {url = "https://files.pythonhosted.org/packages/f2/3a/af2dca5a1362ef41537001f603e0fee001ac1199de5297819a6a2789d255/duckdb-0.7.1-cp39-cp39-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:6730f03b5b78f3943b752c90bdf37b62ae3ac52302282a942cc675825b4a8dc9"},
+]
+"polars 0.17.2" = [
+    {url = "https://files.pythonhosted.org/packages/40/ba/556e08b0a3ec5c0e895ddb617219ebd705f027e8ed2a50132cb31500cffb/polars-0.17.2-cp37-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:96c2e1c99738634eaeb510a724bf1aecc4ecb030cb45a28595d9ceac842300e9"},
+    {url = "https://files.pythonhosted.org/packages/44/95/308d95b0b823fc1f6b7e5f29fe3bdcbc014277c473c8e5e1bf66b46941b2/polars-0.17.2-cp37-abi3-win_amd64.whl", hash = "sha256:a6d1ba5396a241eabf5ab755c7fb9f18a92bebaa8be5327d7ee1f532823aaba7"},
+    {url = "https://files.pythonhosted.org/packages/74/87/dffae94eecf78736057f1f3b54a7e2e8f9781e1d7a6bba907cfb5158f7c9/polars-0.17.2.tar.gz", hash = "sha256:f121ad3515dfc4c0276067870c20585f5e4fa8368efc9cf7ff8c56da4372e312"},
+    {url = "https://files.pythonhosted.org/packages/7a/97/e87d4b755e9581e4f7fcc1745bf159ca3d2421abd57b27c41dfe71d1d2cb/polars-0.17.2-cp37-abi3-macosx_10_7_x86_64.whl", hash = "sha256:4631d29af25cebdec89d006afa9fee868138c1be91d6070dc7c8e1f3e9684287"},
+    {url = "https://files.pythonhosted.org/packages/9e/23/5e2ca6a9db78f8a352d225ec030f6e39d3135d4a3f405b7d7c8988724ae5/polars-0.17.2-cp37-abi3-macosx_11_0_arm64.whl", hash = "sha256:cb69717eebd52d289eb5bf50dc1e90f380874280c4ef3c25b56b6fbc22b706bc"},
+    {url = "https://files.pythonhosted.org/packages/a0/ed/ed212788fd5636ab8f7b6dea2c17352138feb695aa1d91c45b1cd491e903/polars-0.17.2-cp37-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:e01317ea1902cc6ae327598b6998c6c6b8bcd6ff6dff15bad7a78c51231220fa"},
+]
+"typing-extensions 4.5.0" = [
+    {url = "https://files.pythonhosted.org/packages/31/25/5abcd82372d3d4a3932e1fa8c3dbf9efac10cc7c0d16e78467460571b404/typing_extensions-4.5.0-py3-none-any.whl", hash = "sha256:fb33085c39dd998ac16d1431ebc293a8b3eedd00fd4a32de0ff79002c19511b4"},
+    {url = "https://files.pythonhosted.org/packages/d3/20/06270dac7316220643c32ae61694e451c98f8caf4c8eab3aa80a2bedf0df/typing_extensions-4.5.0.tar.gz", hash = "sha256:5cb5f4a79139d699607b3ef622a1dedafa84e115ab0024e0d9c044a9479ca7cb"},
 ]
