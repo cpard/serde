@@ -9,105 +9,151 @@ WITH actor_summary AS (
     ARRAY_AGG(DISTINCT event) as events,
     MIN(created_at) as min_activity,
     MAX(created_at) as max_activity,
-    MIN(IF(is_target_repo AND is_star, created_at, NULL)) as star_time,
+    MIN(CASE WHEN is_target_repo AND is_star THEN created_at ELSE NULL END) as star_time,
     ARRAY_AGG(DISTINCT created_at::DATE) dates,
-    COUNT(*)n,
-    ARRAY_AGG(DISTINCT avatar_url) actor_avatars,
-    ARRAY_AGG(DISTINCT repo) repos,
-    ARRAY_AGG(DISTINCT IFNULL(org, 'no org')) orgs,
-  FROM '../data/parquet/stg_all_actions_for_actors_who_starred_repo.parquet'
+    COUNT(*) n,
+    ARRAY_AGG(DISTINCT avatar_url) FILTER (WHERE avatar_url IS NOT NULL) actor_avatars,
+    ARRAY_AGG(DISTINCT repo) FILTER (WHERE repo IS NOT NULL) repos,
+    ARRAY_AGG(DISTINCT COALESCE(org, 'no org')) orgs
+  FROM read_parquet('../data/parquet/stg_all_actions_for_actors_who_starred_repo.parquet')
   GROUP BY 1
 ),
--- cross join actor_summary to compare each user to each other user in set
--- use nested queries to summarize arrays easily
+a_events AS (
+  SELECT a.actor AS a_actor, unnest(a.events) AS event
+  FROM actor_summary a
+),
+b_events AS (
+  SELECT b.actor AS b_actor, unnest(b.events) AS event
+  FROM actor_summary b
+),
+a_dates AS (
+  SELECT a.actor AS a_actor, unnest(a.dates) AS date
+  FROM actor_summary a
+),
+b_dates AS (
+  SELECT b.actor AS b_actor, unnest(b.dates) AS date
+  FROM actor_summary b
+),
+a_repos AS (
+  SELECT a.actor AS a_actor, unnest(a.repos) AS repo
+  FROM actor_summary a
+),
+b_repos AS (
+  SELECT b.actor AS b_actor, unnest(b.repos) AS repo
+  FROM actor_summary b
+),
+a_orgs AS (
+  SELECT a.actor AS a_actor, unnest(a.orgs) AS org
+  FROM actor_summary a
+),
+b_orgs AS (
+  SELECT b.actor AS b_actor, unnest(b.orgs) AS org
+  FROM actor_summary b
+),
 actor_overlap AS (
  SELECT
-   *, -- keep all data about original user + overlap with comparison user
-   -- calculate additional stats on overlap arrays
+   *,
    ARRAY_LENGTH(events_overlap) n_events_overlap,
    ARRAY_LENGTH(dates_overlap) n_dates_overlap,
    ARRAY_LENGTH(repo_overlap) n_repo_overlap,
    ARRAY_LENGTH(org_overlap) n_org_overlap,
-   ARRAY_LENGTH(events_overlap)/n_events as p_events_overlap,
-   ARRAY_LENGTH(dates_overlap)/n_dates as p_dates_overlap,
-   ARRAY_LENGTH(repo_overlap)/n_repos as p_repo_overlap,
-   ARRAY_LENGTH(org_overlap)/n_orgs as p_org_overlap,
+   ARRAY_LENGTH(events_overlap)/n_events::FLOAT as p_events_overlap,
+   ARRAY_LENGTH(dates_overlap)/n_dates::FLOAT as p_dates_overlap,
+   ARRAY_LENGTH(repo_overlap)/n_repos::FLOAT as p_repo_overlap,
+   ARRAY_LENGTH(org_overlap)/n_orgs::FLOAT as p_org_overlap
  FROM (
    SELECT
-     a.*, -- keep all data about original user
-     -- calculate additional stats for original user
+     a.actor as actor,
+        a.events as events,
+        a.min_activity as min_activity,
+        a.max_activity as max_activity,
+        a.star_time as star_time,
+        a.dates as dates,
+        a.n as n,
+        a.actor_avatars as actor_avatars,
+        a.repos as repos,
+        a.orgs as orgs,
      ARRAY_LENGTH(a.events) as n_events,
      ARRAY_LENGTH(a.dates) as n_dates,
      ARRAY_LENGTH(a.repos) as n_repos,
      ARRAY_LENGTH(a.orgs) as n_orgs,
-     b.actor as actor2, -- the comparison user
-     -- calculate overlapping events, dates, repos, and orgs
-     ARRAY(
-       SELECT * FROM a.events
-       INTERSECT DISTINCT
-       SELECT * FROM b.events
+     b.actor as actor2,
+     list(
+       (SELECT DISTINCT a_events.event
+       FROM a_events
+       JOIN b_events ON a_events.event = b_events.event
+       WHERE a_events.a_actor != b_events.b_actor)
      ) AS events_overlap,
-     ARRAY(
-       SELECT * FROM a.dates
-       INTERSECT DISTINCT
-       SELECT * FROM b.dates
+     list(
+       (SELECT DISTINCT a_dates.date
+       FROM a_dates
+       JOIN b_dates ON a_dates.date = b_dates.date
+       WHERE a_dates.a_actor != b_dates.b_actor)
      ) AS dates_overlap,
-     ARRAY(
-       SELECT * FROM a.repos
-       INTERSECT DISTINCT
-       SELECT * FROM b.repos
+     list(
+       (SELECT DISTINCT a_repos.repo
+       FROM a_repos
+       JOIN b_repos ON a_repos.repo = b_repos.repo
+       WHERE a_repos.a_actor != b_repos.b_actor)
      ) AS repo_overlap,
-     ARRAY(
-       SELECT * FROM a.orgs
-       INTERSECT DISTINCT
-       SELECT * FROM b.orgs
-     ) AS org_overlap,
+     list(
+       (SELECT DISTINCT a_orgs.org
+       FROM a_orgs
+       JOIN b_orgs ON a_orgs.org = b_orgs.org
+       WHERE a_orgs.a_actor != b_orgs.b_actor)
+     ) AS org_overlap
    FROM actor_summary a
    CROSS JOIN actor_summary b
    WHERE a.actor != b.actor
+   group by 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15
  )
-)
--- final actor summary table: 1 row per actor showing average amount of overlap with other actors in set
-SELECT 
- -- get DISTINCT values from overlap arrays
- ARRAY(SELECT DISTINCT a FROM a.events_overlap a ) as events_overlap,
- ARRAY(SELECT DISTINCT a FROM a.dates_overlap a ) as dates_overlap,
- ARRAY(SELECT DISTINCT a FROM a.repo_overlap a ) as repo_overlap,
- ARRAY(SELECT DISTINCT a FROM a.org_overlap a ) as org_overlap,
- n/n_repos as actions_per_repo
-FROM (
- SELECT
-   -- keep all data about original user (use ANY_VALUE b/c rows are duplicated)
+),
+final_inner AS (
+SELECT
    actor,
-   ANY_VALUE(events)events,
-   ANY_VALUE(min_activity)min_activity,
-   ANY_VALUE(max_activity)max_activity,
-   ANY_VALUE(star_time)star_time,
-   ANY_VALUE(dates)dates,
-   ANY_VALUE(n)n,
-   ANY_VALUE(actor_avatars)actor_avatars,
-   ANY_VALUE(repos)repos,
-   ANY_VALUE(orgs)orgs,
-   ANY_VALUE(n_events)n_events,
-   ANY_VALUE(n_dates)n_dates,
-   ANY_VALUE(n_repos)n_repos,
-   ANY_VALUE(n_orgs)n_orgs,
-   -- collapse overlap data to summarize similarity to other users in set
-   ARRAY_CONCAT_AGG(events_overlap) as events_overlap,
-   ARRAY_CONCAT_AGG(dates_overlap) as dates_overlap,
-   ARRAY_CONCAT_AGG(repo_overlap) as repo_overlap,
-   ARRAY_CONCAT_AGG(org_overlap) as org_overlap,
-   AVG(n_events_overlap)n_events_overlap,
-   AVG(n_dates_overlap)n_dates_overlap,
-   AVG(n_repo_overlap)n_repo_overlap,
-   AVG(n_org_overlap)n_org_overlap,
-   AVG(p_events_overlap)p_events_overlap,
-   AVG(p_dates_overlap)p_dates_overlap,
-   AVG(p_repo_overlap)p_repo_overlap,
-   AVG(p_org_overlap)p_org_overlap,
+   ANY_VALUE(events) events,
+   ANY_VALUE(min_activity) min_activity,
+   ANY_VALUE(max_activity) max_activity,
+   ANY_VALUE(star_time) star_time,
+   ANY_VALUE(dates) dates,
+   ANY_VALUE(n) n,
+   ANY_VALUE(actor_avatars) actor_avatars,
+   ANY_VALUE(repos) repos,
+   ANY_VALUE(orgs) orgs,
+   ANY_VALUE(n_events) n_events,
+   ANY_VALUE(n_dates) n_dates,
+   ANY_VALUE(n_repos) n_repos,
+   ANY_VALUE(n_orgs) n_orgs,
+   ANY_VALUE(events_overlap) events_overlap,
+   ANY_VALUE(dates_overlap) dates_overlap,
+   ANY_VALUE(repo_overlap) repo_overlap,
+   ANY_VALUE(org_overlap) org_overlap,
+   AVG(n_events_overlap) n_events_overlap,
+   AVG(n_dates_overlap) n_dates_overlap,
+   AVG(n_repo_overlap) n_repo_overlap,
+   AVG(n_org_overlap) n_org_overlap,
+   AVG(p_events_overlap) p_events_overlap,
+   AVG(p_dates_overlap) p_dates_overlap,
+   AVG(p_repo_overlap) p_repo_overlap,
+   AVG(p_org_overlap) p_org_overlap
  FROM actor_overlap
  GROUP BY 1
- ) a
+)
+SELECT actor,
+ list( (SELECT DISTINCT UNNEST(events_overlap) from final_inner) ) as events_overlap_distinct,
+ list( (SELECT DISTINCT UNNEST(dates_overlap) from final_inner) ) as dates_overlap_distinct,
+ list( (SELECT DISTINCT UNNEST(repo_overlap) from final_inner) ) as repo_overlap_distinct,
+ list( (SELECT DISTINCT UNNEST(org_overlap) from final_inner) ) as org_overlap_distinct,
+ n/n_repos::FLOAT as actions_per_repo
+FROM final_inner group by 1,6
 """
 
-duckdb.sql(query).show()
+start_time = time.time()
+print(duckdb.sql(query))
+print("--- %s seconds for modelling query---" % (time.time() - start_time))
+
+q_output = f'copy ({query}) to \'../data/parquet/stg_starring_actor_overlap.parquet\' (format  PARQUET, COMPRESSION ZSTD, ROW_GROUP_SIZE 100000);'
+
+start_time = time.time()
+duckdb.sql(q_output)
+print("--- %s seconds for Parquet I/O query---" % (time.time() - start_time))

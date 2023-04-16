@@ -16,6 +16,11 @@ dependencies = [
 ]
 
 [[package]]
+name = "sqlglot"
+version = "11.5.3"
+summary = "An easily customizable SQL parser and transpiler"
+
+[[package]]
 name = "typing-extensions"
 version = "4.5.0"
 requires_python = ">=3.7"
@@ -24,7 +29,7 @@ summary = "Backported and Experimental Type Hints for Python 3.7+"
 [metadata]
 lock_version = "4.2"
 groups = ["default"]
-content_hash = "sha256:d01a415fb4687868c0dc3829ce8490c2a764ffbad13c5ae5f2650be461692223"
+content_hash = "sha256:3b3f7ff95220dc09e056242b9a4a32e58833366b2b29458f747ef03f62624a68"
 
 [metadata.files]
 "duckdb 0.7.1" = [
@@ -83,6 +88,10 @@ content_hash = "sha256:d01a415fb4687868c0dc3829ce8490c2a764ffbad13c5ae5f2650be46
     {url = "https://files.pythonhosted.org/packages/7a/97/e87d4b755e9581e4f7fcc1745bf159ca3d2421abd57b27c41dfe71d1d2cb/polars-0.17.2-cp37-abi3-macosx_10_7_x86_64.whl", hash = "sha256:4631d29af25cebdec89d006afa9fee868138c1be91d6070dc7c8e1f3e9684287"},
     {url = "https://files.pythonhosted.org/packages/9e/23/5e2ca6a9db78f8a352d225ec030f6e39d3135d4a3f405b7d7c8988724ae5/polars-0.17.2-cp37-abi3-macosx_11_0_arm64.whl", hash = "sha256:cb69717eebd52d289eb5bf50dc1e90f380874280c4ef3c25b56b6fbc22b706bc"},
     {url = "https://files.pythonhosted.org/packages/a0/ed/ed212788fd5636ab8f7b6dea2c17352138feb695aa1d91c45b1cd491e903/polars-0.17.2-cp37-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:e01317ea1902cc6ae327598b6998c6c6b8bcd6ff6dff15bad7a78c51231220fa"},
+]
+"sqlglot 11.5.3" = [
+    {url = "https://files.pythonhosted.org/packages/c8/5d/c60aa224eef9d21837ea5fec33e8955535e216b2d9726498fb116c49a64b/sqlglot-11.5.3.tar.gz", hash = "sha256:be37b832fc138a53a9465c730ddb1ccb1c39193aece40557066b1af0a41b0cee"},
+    {url = "https://files.pythonhosted.org/packages/ef/d6/8fba32974450ca3d401e2e6f34df7055434c19ee440062ea5b1e29e5b254/sqlglot-11.5.3-py3-none-any.whl", hash = "sha256:56a97e7c693ee541eb1866809c75e1fb3558e648d758f79a60abe11eabdafcad"},
 ]
 "typing-extensions 4.5.0" = [
     {url = "https://files.pythonhosted.org/packages/31/25/5abcd82372d3d4a3932e1fa8c3dbf9efac10cc7c0d16e78467460571b404/typing_extensions-4.5.0-py3-none-any.whl", hash = "sha256:fb33085c39dd998ac16d1431ebc293a8b3eedd00fd4a32de0ff79002c19511b4"},
