@@ -1,3 +1,7 @@
+# my stuff
+format.py
+rusty_serde/.idea/*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
