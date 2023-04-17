@@ -27,7 +27,7 @@ watch_event_actors AS (
     DISTINCT actor.login as actor
   FROM raw_data
     WHERE type = 'WatchEvent' -- starred
-    AND repo.name = 'netdata/netdata'
+    AND repo.name = 'frasermarlow/tap-bls'
     AND actor.login NOT LIKE '%[bot]'-- reduce table size
 )
 SELECT
@@ -46,7 +46,7 @@ WHERE actor.login IN (SELECT actor FROM watch_event_actors);"""
 
 q_parquet = """
 with parquet_data AS (
-    select * FROM read_parquet('*.parquet')
+    select * FROM read_parquet('../data/parquet/output.parquet')
 ),
 watch_event_actors AS (
   SELECT
