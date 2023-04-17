@@ -140,12 +140,33 @@ SELECT
  GROUP BY 1
 )
 SELECT actor,
+    events,
+    min_activity,
+    max_activity,
+    star_time,
+    dates,
+    n,
+    actor_avatars,
+    repos,
+    orgs,
+    n_events,
+    n_dates,
+    n_repos,
+    n_orgs,
+    n_events_overlap,
+    n_dates_overlap,
+    n_repo_overlap,
+    n_org_overlap,
+    p_events_overlap,
+    p_dates_overlap,
+    p_repo_overlap,
+    p_org_overlap,
  list( (SELECT DISTINCT UNNEST(events_overlap) from final_inner) ) as events_overlap_distinct,
  list( (SELECT DISTINCT UNNEST(dates_overlap) from final_inner) ) as dates_overlap_distinct,
  list( (SELECT DISTINCT UNNEST(repo_overlap) from final_inner) ) as repo_overlap_distinct,
  list( (SELECT DISTINCT UNNEST(org_overlap) from final_inner) ) as org_overlap_distinct,
  n/n_repos::FLOAT as actions_per_repo
-FROM final_inner group by 1,6
+FROM final_inner group by 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,27
 """
 
 start_time = time.time()
