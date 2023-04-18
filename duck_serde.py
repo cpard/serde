@@ -5,7 +5,7 @@ import time
 data_folder = Path("../data/parquet/")
 filename = '2023-01-01-15.json'
 json_file = data_folder / filename
-output_file_name = 'output.parquet'
+output_file_name = data_folder / 'output.parquet'
 
 q_input = """
 SELECT *

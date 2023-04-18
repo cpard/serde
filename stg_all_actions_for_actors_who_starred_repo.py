@@ -2,10 +2,12 @@ import duckdb
 from pathlib import Path
 import time
 
-query = """
+repo_name = 'netdata/netdata'
+
+query = f"""
 WITH raw_data AS (
 select * FROM read_json('../data/*.json.gz',
-columns={
+columns={{
       id: 'BIGINT',
       type: 'VARCHAR',
       actor: 'STRUCT(id UBIGINT,
@@ -19,7 +21,7 @@ columns={
       public: 'BOOLEAN',
       created_at: 'TIMESTAMP',
       org: 'STRUCT(id UBIGINT, login VARCHAR, gravatar_id VARCHAR, url VARCHAR, avatar_url VARCHAR)'
-    }, 
+    }}, 
         maximum_object_size=20000000, sample_size=-1, lines='true', timestampformat='%Y-%m-%dT%H:%M:%SZ')
 ),
 watch_event_actors AS (
@@ -27,7 +29,7 @@ watch_event_actors AS (
     DISTINCT actor.login as actor
   FROM raw_data
     WHERE type = 'WatchEvent' -- starred
-    AND repo.name = 'frasermarlow/tap-bls'
+    AND repo.name = {repo_name}
     AND actor.login NOT LIKE '%[bot]'-- reduce table size
 )
 SELECT
@@ -39,7 +41,7 @@ SELECT
   repo.name repo,
   org.login org,
   payload,
-  IF(repo.name = 'netdata/netdata', TRUE, FALSE) as is_target_repo,
+  IF(repo.name = {repo_name}, TRUE, FALSE) as is_target_repo,
   IF(type = 'WatchEvent', TRUE, FALSE) as is_star,
 FROM raw_data
 WHERE actor.login IN (SELECT actor FROM watch_event_actors);"""
